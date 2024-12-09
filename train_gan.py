@@ -385,7 +385,7 @@ def train(
 
     # Used for discriminator binary classification output, the input sample comes from the data set (real sample) is marked as 1, and the input sample comes from the generator (generated sample) is marked as 0
     batch_size = batch_data["gt"].shape[0]
-    if config["MODEL"]["D"]["NAME"] == "discriminator_for_vgg":
+    if config["MODEL"]["D"]["NAME"] == "discriminator_for_PatchGAN":
         real_label = torch.full([batch_size, 1], 1.0, dtype=torch.float, device=device)
         fake_label = torch.full([batch_size, 1], 0.0, dtype=torch.float, device=device)
     elif config["MODEL"]["D"]["NAME"] == "discriminator_for_unet":
