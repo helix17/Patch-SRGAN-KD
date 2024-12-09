@@ -35,7 +35,7 @@ TRAIN:
 
   # Model file address, used for pre-training and recovery training
   CHECKPOINT:
-    PRETRAINED_G_MODEL: "/content/Patch-SRGAN-KD/results/pretrained_models/SRResNet_x4-SRGAN_ImageNet.pth.tar"
+    PRETRAINED_G_MODEL: "./results/pretrained_models/SRResNet_x4-SRGAN_ImageNet.pth.tar"
     PRETRAINED_D_MODEL: ""
     RESUMED_G_MODEL: ""
     RESUMED_D_MODEL: ""
@@ -85,8 +85,8 @@ TRAIN:
 
 TEST:
   DATASET:
-    PAIRED_TEST_GT_IMAGES_DIR: "/content/Patch-SRGAN-KD/data/Set5/X4/GT"
-    PAIRED_TEST_LR_IMAGES_DIR: "/content/Patch-SRGAN-KD/data/Set5/X4/LR"
+    PAIRED_TEST_GT_IMAGES_DIR: "./data/Set5/X4/GT"
+    PAIRED_TEST_LR_IMAGES_DIR: "./data/Set5/X4/LR"
 
   # Test hyperparameters
   HYP:
