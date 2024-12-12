@@ -44,13 +44,13 @@ TRAIN:
   CHECKPOINT:
     PRETRAINED_TEACHER_MODEL: "./results/pretrained_models/Teacher-SRGAN.pth.tar"
     PRETRAINED_STUDENT_MODEL: ""
-    PRETRAINED_D_MODEL: ""
+    PRETRAINED_D_MODEL: "./results/pretrained_models/d_best.pth.tar"
     RESUMED_G_MODEL: ""
     RESUMED_D_MODEL: ""
 
   # training hyperparameters
   HYP:
-    EPOCHS: 18
+    EPOCHS: 50
 
     IMGS_PER_BATCH: 16
     SHUFFLE: True
@@ -89,8 +89,8 @@ TRAIN:
       NAME: vanilla
       WEIGHT: [ 0.001 ]
     DISTILLATION_LOSS:
-      NAME: DistillationLoss
-      WEIGHT: [ 1.0 ]
+      NAME: L1Loss
+      WEIGHT: [ 0.01 ]
 
   PRINT_FREQ: 100
 

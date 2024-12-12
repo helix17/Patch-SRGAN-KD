@@ -308,7 +308,7 @@ def define_loss_with_kd(config: Any, device: torch.device) -> [nn.MSELoss, model
     else:
         raise NotImplementedError(f"Loss {config['TRAIN']['LOSSES']['ADVERSARIAL_LOSS']['NAME']} is not implemented.")
 
-    if config["TRAIN"]["LOSSES"]["DISTILLATION_LOSS"]["NAME"] == "DistillationLoss":
+    if config["TRAIN"]["LOSSES"]["DISTILLATION_LOSS"]["NAME"] == "L1Loss":
         distillation_criterion = nn.L1Loss()
     else:
         raise NotImplementedError(f"Loss {config['TRAIN']['LOSSES']['DISTILLATION_LOSS']['NAME']} is not implemented.")
