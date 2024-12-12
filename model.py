@@ -419,9 +419,6 @@ class ENetContentLoss(nn.Module):
 
         return losses
 
-def DistillationLoss(student_output, teacher_output):
-    content_loss = torch.nn.L1Loss()(student_output, teacher_output)
-    return content_loss
 
 class ContentLoss(nn.Module):
     """Constructs a content loss function based on the VGG19 network.

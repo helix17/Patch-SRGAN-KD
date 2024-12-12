@@ -20,7 +20,7 @@ MODEL:
     CHANNELS: 32
     NUM_RCB: 8
     COMPILED: True
-  G:
+  TEACHER:
     NAME: srresnet_x4
     IN_CHANNELS: 3
     OUT_CHANNELS: 3
@@ -43,7 +43,7 @@ TRAIN:
   # Model file address, used for pre-training and recovery training
   CHECKPOINT:
     PRETRAINED_TEACHER_MODEL: "./results/pretrained_models/Teacher-SRGAN.pth.tar"
-    PRETRAINED_G_MODEL: ""
+    PRETRAINED_STUDENT_MODEL: ""
     PRETRAINED_D_MODEL: ""
     RESUMED_G_MODEL: ""
     RESUMED_D_MODEL: ""

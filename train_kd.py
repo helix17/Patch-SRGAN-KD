@@ -259,6 +259,7 @@ def build_models_for_kd(
                                                            out_channels=config["MODEL"]["D"]["OUT_CHANNELS"],
                                                            channels=config["MODEL"]["D"]["CHANNELS"])
 
+    teacher_model = teacher_model.to(device)
     student_model = student_model.to(device)
     d_model = d_model.to(device)
 
@@ -308,7 +309,7 @@ def define_loss_with_kd(config: Any, device: torch.device) -> [nn.MSELoss, model
         raise NotImplementedError(f"Loss {config['TRAIN']['LOSSES']['ADVERSARIAL_LOSS']['NAME']} is not implemented.")
 
     if config["TRAIN"]["LOSSES"]["DISTILLATION_LOSS"]["NAME"] == "DistillationLoss":
-        distillation_criterion = model.DistillationLoss()
+        distillation_criterion = nn.L1Loss()
     else:
         raise NotImplementedError(f"Loss {config['TRAIN']['LOSSES']['DISTILLATION_LOSS']['NAME']} is not implemented.")
 
@@ -363,7 +364,7 @@ def train_with_kd(
         pixel_criterion: nn.L1Loss,
         content_criterion: model.ENetContentLoss,
         adversarial_criterion: nn.BCEWithLogitsLoss,
-        distillation_criterion: model.DistillationLoss,
+        distillation_criterion: nn.L1Loss,
         student_optimizer: optim.Adam,
         d_optimizer: optim.Adam,
         epoch: int,
