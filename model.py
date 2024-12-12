@@ -166,6 +166,7 @@ class StudentSRResNet(nn.Module):
 
         return x
 
+
 class SRResNet(nn.Module):
     def __init__(
             self,
