@@ -101,6 +101,70 @@ class _FeatureExtractor(nn.Module):
 
         return x
 
+class StudentSRResNet(nn.Module):
+    def __init__(
+            self,
+            in_channels: int = 3,
+            out_channels: int = 3,
+            channels: int = 32,  # Reduced number of channels
+            num_rcb: int = 8,    # Fewer residual blocks
+            upscale: int = 4,
+    ) -> None:
+        super(StudentSRResNet, self).__init__()
+        # Low frequency information extraction layer
+        self.conv1 = nn.Sequential(
+            nn.Conv2d(in_channels, channels, (9, 9), (1, 1), (4, 4)),
+            nn.PReLU(),
+        )
+
+        # High frequency information extraction block
+        trunk = []
+        for _ in range(num_rcb):
+            trunk.append(_ResidualConvBlock(channels))  # Reuse the same block but fewer instances
+        self.trunk = nn.Sequential(*trunk)
+
+        # High-frequency information linear fusion layer
+        self.conv2 = nn.Sequential(
+            nn.Conv2d(channels, channels, (3, 3), (1, 1), (1, 1), bias=False),
+            nn.BatchNorm2d(channels),
+        )
+
+        # Simplified zoom block
+        upsampling = []
+        if upscale == 2 or upscale == 4 or upscale == 8:
+            for _ in range(int(math.log(upscale, 2))):
+                upsampling.append(_UpsampleBlock(channels, 2))  # Reuse the same upsample block
+        else:
+            raise NotImplementedError(f"Upscale factor `{upscale}` is not supported.")
+        self.upsampling = nn.Sequential(*upsampling)
+
+        # Reconstruction block
+        self.conv3 = nn.Conv2d(channels, out_channels, (9, 9), (1, 1), (4, 4))
+
+        # Initialize neural network weights
+        for module in self.modules():
+            if isinstance(module, nn.Conv2d):
+                nn.init.kaiming_normal_(module.weight)
+                if module.bias is not None:
+                    nn.init.constant_(module.bias, 0)
+            elif isinstance(module, nn.BatchNorm2d):
+                nn.init.constant_(module.weight, 1)
+
+    def forward(self, x: Tensor) -> Tensor:
+        return self._forward_impl(x)
+
+    # Support torch.script function
+    def _forward_impl(self, x: Tensor) -> Tensor:
+        conv1 = self.conv1(x)
+        x = self.trunk(conv1)
+        x = self.conv2(x)
+        x = torch.add(x, conv1)
+        x = self.upsampling(x)
+        x = self.conv3(x)
+
+        x = torch.clamp_(x, 0.0, 1.0)
+
+        return x
 
 class SRResNet(nn.Module):
     def __init__(
@@ -355,6 +419,10 @@ class ENetContentLoss(nn.Module):
 
         return losses
 
+def DistillationLoss(student_output, teacher_output):
+    content_loss = torch.nn.L1Loss()(student_output, teacher_output)
+    return content_loss
+
 class ContentLoss(nn.Module):
     """Constructs a content loss function based on the VGG19 network.
     Using high-level feature mapping layers from the latter layers will focus more on the texture content of the image.
@@ -438,6 +506,11 @@ def srresnet_x4(**kwargs: Any) -> SRResNet:
 
 def srresnet_x8(**kwargs: Any) -> SRResNet:
     model = SRResNet(upscale=8, **kwargs)
+
+    return model
+
+def studentsrresnet(**kwargs: Any) -> StudentSRResNet:
+    model = StudentSRResNet(upscale=4, **kwargs)
 
     return model
 
