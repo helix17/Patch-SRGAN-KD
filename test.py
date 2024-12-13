@@ -19,8 +19,11 @@ from typing import Any
 import cv2
 import torch
 import yaml
+import numpy as np
 from torch import nn
+
 from torch.utils.data import DataLoader
+import lpips
 
 import model
 from dataset import CUDAPrefetcher, PairedImageDataset
@@ -72,7 +75,9 @@ def test(
         save_image = True
         save_image_dir = os.path.join(config["TEST"]["SAVE_IMAGE_DIR"], config["EXP_NAME"])
         make_directory(save_image_dir)
-
+    # Initialize LPIPS Loss
+    lpips_loss = lpips.LPIPS(net='alex')
+    lpips_loss = lpips_loss.to(device)
     # Calculate the number of iterations per epoch
     batches = len(test_data_prefetcher)
     # Interval printing
@@ -90,6 +95,8 @@ def test(
 
     # set the model as validation model
     g_model.eval()
+
+    lpips_losses = []
 
     with torch.no_grad():
         # Initialize data batches
@@ -113,6 +120,11 @@ def test(
             # Calculate the image sharpness evaluation index
             psnr = psnr_model(sr, gt)
             ssim = ssim_model(sr, gt)
+
+            # Compute LPIPS loss
+            loss = lpips_loss(gt, sr)
+            lpips_losses.append(loss.mean().item())
+            print(f"LPIPS Loss for current batch: {loss.mean().item()}")
 
             # record current metrics
             psnres.update(psnr.item(), sr.size(0))
@@ -141,6 +153,7 @@ def test(
             # Add 1 to the number of data batches
             batch_index += 1
 
+    print(np.mean(lpips_losses))
     # Print the performance index of the model at the current Epoch
     progress.display_summary()
 
